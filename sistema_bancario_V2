@@ -1,0 +1,173 @@
+# FUNÇÃO PARA A PRIMEIRA EXECUÇÃO DO PROGRAMA
+def primeira_execucao(): # NÃO IRÁ POSSUIR UM PARÂMETRO POIS É O PRIMEIRO REGISTRO DO SISTEMA
+    
+    print('Bem Vindo! Por favor faça o registro inicial da sua conta')
+    print('=' * 50)
+    
+    nome = input('Informe o Seu Nome: ')
+    cpf = input('Informe o Seu CPF: ')
+    numero_conta = input('Informe o Número da Sua Conta: ')
+    
+    print('=' * 50)
+    
+    novos_usuarios = {
+        'nome' : nome,
+        'cpf' : cpf,
+        'numero_conta' : numero_conta,
+        'saldo' : 0
+    }
+
+    print('Usuário Cadastrado com Sucesso!')
+    
+    return novos_usuarios
+
+# FUNÇÃO PARA A APRESENTAÇÃO DO MENU
+def menu_inicial():
+    
+    print('''
+    [1] DEPÓSITO
+    [2] SAQUE
+    [3] EXTRATO
+    [4] CRIAR USUÁRIO
+    [5] LISTAR CONTAS
+    [0] SAIR
+    ''')
+    opcao = str(input('Escolha uma operação: '))
+    
+    return opcao
+
+# FUNÇÃO PARA A OPERAÇÃO DE DEPÓSITO
+def operacao_deposito(saldo, extrato):
+
+# A VARIÁVEL VALOR NÃO SERÁ INSERIDA COMO ARGUMENTO POIS A SUA DECLARAÇÃO SERÁ FEITA A PARTIR DA ENTRADA DO USUÁRIO
+    valor = float(input('Informe o valor para depósito: R$ '))
+    
+    if valor > 0:
+        saldo += valor
+        extrato.append(f'Depósito Realizado: R$ {valor:.2f}')
+        print('Depósito Realizado com Sucesso!')
+    else:
+        print('Valor Inválido!')
+    
+    return saldo, extrato
+
+#FUNÇÃO PARA A OPERAÇÃO DE SAQUE
+def operacao_saque(saldo, extrato, limite_saque, numero_saques):
+    
+    valor = float(input('Informe o valor para o saque: R$ '))
+    
+    if valor <= 0:
+        print('Valor Inválido')
+        
+    elif numero_saques > 3:
+        print('Limite de Saques Diários Excedidos')
+    
+    elif valor > saldo:
+        print('Saldo Insuficiente para o Saque') 
+        
+    elif valor + limite_saque > 500:
+        print('Limite de Saque Diário de R$ 500,00 Excedido')
+    
+    else:
+        
+        saldo -= valor
+        limite_saque += valor
+        numero_saques += 1
+        extrato.append(f'Saque Realizado R$ {valor:.2f}')
+        print('Saque Realizado com Sucesso!')
+    
+    return saldo, extrato, limite_saque, numero_saques
+
+#FUNÇÃO PARA A OPERAÇÃO DE EXTRATO
+def operacao_extrato(extrato, saldo):
+    
+    print('=' * 50)
+    print('EXTRATO DE MOVIMENTAÇÕES')
+    print('=' * 50)
+    
+    if not extrato:
+        print('Não foram realizadas operações durante a sessão')
+    
+    else:
+        for operacoes in extrato:
+            print(operacoes)
+            print('=' * 50)
+            print(f'Saldo Atual R$ {saldo:.2f}')
+            print('=' * 50)
+    
+    return extrato, saldo
+
+# FUNÇÃO PARA A CRIAÇÃO DE NOVOS USUÁRIOS
+def novos_usuarios(lista_usuarios):
+    
+    nome = input('Informe o Seu Nome: ')
+    cpf = input('Insira o Seu CPF: ')
+    numero_conta = input('Insira a Sua Conta: ')
+
+    for usuario in lista_usuarios:
+        if usuario['cpf'] == cpf:
+            print('CPF já cadastrado!')
+            
+            return lista_usuarios
+    
+    novo_usuarios = {
+        'nome' : nome,
+        'cpf' : cpf,
+        'numero_conta' : numero_conta,
+        'saldo' : 0
+    }
+
+    lista_usuarios.append(novo_usuarios)
+    print('Usuário Cadastrado com Sucesso!')
+    
+    return lista_usuarios
+
+# FUNÇÃO PARA A OPERAÇÃO DE LISTAR CONTAS
+def contas_criadas(lista_usuarios):
+    print('=' * 50)
+    print('CONTAS CRIADAS')
+    print('=' * 50)
+    
+    if not lista_usuarios:
+        print('Nenhuma Conta Adicional Foi Criada')
+    
+    else:
+        for usuario in lista_usuarios:
+            print(f"Nome {usuario['nome']}, CPF {usuario['cpf']}, Conta {usuario['numero_conta']}, Saldo {usuario['saldo']}")
+            print('=' * 50)
+    
+# FUNÇÃO PRINCIPAL QUE COORDENARÁ AS OPERAÇÕES (todas as outras funções serão executadas)
+def main():
+
+    saldo = 0
+    extrato = []
+    limite_saque = 0
+    numero_saques = 0
+    lista_usuarios = []
+    
+    primeiro_usuario = primeira_execucao()
+    lista_usuarios.append(primeiro_usuario)
+    
+    while True:
+        
+        opcao = menu_inicial()
+        
+        if opcao == '1':
+            saldo, extrato = operacao_deposito(saldo, extrato)
+        
+        if opcao == '2':
+            saldo, extrato, limite_saque, numero_saques = operacao_saque(saldo, extrato, limite_saque, numero_saques)
+        
+        if opcao == '3':
+            extrato, saldo = operacao_extrato(extrato, saldo)
+            
+        if opcao == '4':
+            lista_usuarios = novos_usuarios(lista_usuarios)
+        
+        if opcao == '5':
+            contas_criadas(lista_usuarios)
+
+
+# A FUNÇÃO "MAIN" É IMPORTADA DESSA FORMA PARA IMPEDIR QUE HAJA UM CONFLITO COM ALGUM MÓDULO QUE SEJA IMPORTADO EM OUTRA EXECUÇÃO
+if __name__ == "__main__":
+    main()
