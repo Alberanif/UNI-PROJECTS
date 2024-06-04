@@ -1,0 +1,59 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+
+# IMPORTANDO O BANCO DE DADOS
+df_original = pd.read_csv(r'C:\Users\alber\OneDrive\Área de Trabalho\BANCO DE DADOS\obesity_classification.csv')
+
+# TRATAMENTO DO BANCO DE DADOS PARA RETIRAR INFORMAÇÕES QUE NÃO SERÃO UTILIZADAS
+df_limpo = df_original.drop(['ID', 'Label'], axis=1)
+
+# TRANSFORMAR AS COLUNAS DO DATASET EM MATRIZES PARA QUE SEJA POSSÍVEL O CÁLCULO DE NORMALIZAÇÃO
+df_altura = df_original[['Height']]
+matriz_altura = df_altura.values
+matriz_altura = matriz_altura.reshape((27,4))
+
+df_peso = df_original[['Weight']]
+matriz_peso = df_peso.values
+matriz_peso = matriz_peso.reshape((27,4))
+
+df_imc = df_original[['BMI']]
+matriz_imc = df_imc.values
+matriz_imc = matriz_imc.reshape((27,4))
+
+# CRIANDO AS FUNÇÕES PARA REALIZAR A NORMALIZAÇÃO DOS DADOS UTILIZANDO O BROADCAST
+def normalizar_matriz(matriz):
+    media_matriz= matriz.mean()
+    desvio_matriz = matriz.std()
+    matriz_normalizada = (matriz - media_matriz) / desvio_matriz
+
+    return matriz_normalizada
+
+matriz_peso_normalizada = normalizar_matriz(matriz_peso)
+matriz_altura_normalizada = normalizar_matriz(matriz_altura)
+
+# TRANSFORMAR OS DADOS DE PESO E ALTURA EM APENAS UMA MATRIZ COM TODAS AS INFORMAÇÕES
+matriz_peso_altura = np.concatenate((matriz_peso_normalizada, matriz_altura_normalizada), axis=1)
+
+# PROCESSO DE DIVISÃO DE DADOS PARA TREINAMENTO
+X = matriz_peso_altura
+y = matriz_imc
+
+# DIVISÃO DOS DADOS PARA TREINAMENTO E TESTE
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# INICIALIZANDO O APRENDIZADO 
+modelo_aprendizagem = LinearRegression()
+
+modelo_aprendizagem.fit(X_train, y_train)
+
+# VARIÁVEL RESPONSÁVEL POR FORNECER QUAL O SCORE DA ACERTIVIDADE DO MODELO CRIADO
+resultados = modelo_aprendizagem.score(X_test, y_test)
+
+print(f'O coeficiente de determinação R^2 da previsão é: {resultados}')
+
+
+# VARIÁVEL QUE IRÁ CRIAR UMA MATRIZ DE PREVISÕES ATRAVÉS DE UMA MATRIZ DE TESTES
+y_pred = modelo_aprendizagem.predict(X_test)
