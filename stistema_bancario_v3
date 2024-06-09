@@ -1,0 +1,194 @@
+from abc import ABC, abstractmethod
+
+class Historico:
+    def __init__(self):
+        self.transacoes = []
+
+    def adicionar_transacao(self, transacao):
+        self.transacoes.append(transacao)
+
+class Transacao(ABC):
+    @abstractmethod
+    def registrar(self, conta):
+        pass
+
+class Deposito(Transacao):
+    def __init__(self, valor):
+        self.valor = valor
+
+    def registrar(self, conta):
+        conta.saldo += self.valor
+        conta.historico.adicionar_transacao(self)
+
+class Saque(Transacao):
+    def __init__(self, valor):
+        self.valor = valor
+
+    def registrar(self, conta):
+        if conta.saldo >= self.valor:
+            conta.saldo -= self.valor
+            conta.historico.adicionar_transacao(self)
+            return True
+        return False
+
+class Conta:
+    def __init__(self, saldo, numero, agencia, cliente):
+        self.saldo = saldo
+        self.numero = numero
+        self.agencia = agencia
+        self.cliente = cliente
+        self.historico = Historico()
+
+    def sacar(self, valor):
+        saque = Saque(valor)
+        if saque.registrar(self):
+            print('Saque realizado com sucesso!')
+            return True
+        else:
+            print('Saldo insuficiente para o saque.')
+            return False
+
+    def depositar(self, valor):
+        deposito = Deposito(valor)
+        deposito.registrar(self)
+        print('Depósito realizado com sucesso!')
+
+class Cliente:
+    def __init__(self, endereco):
+        self.endereco = endereco
+        self.contas = []
+
+    def realizar_transacao(self, conta, transacao):
+        transacao.registrar(conta)
+
+    def adicionar_conta(self, conta):
+        self.contas.append(conta)
+
+class PessoaFisica(Cliente):
+    def __init__(self, cpf, nome, data_nascimento, endereco):
+        super().__init__(endereco)
+        self.cpf = cpf
+        self.nome = nome
+        self.data_nascimento = data_nascimento
+# FUNÇÃO PARA A PRIMEIRA EXECUÇÃO DO PROGRAMA
+def primeira_execucao():
+    print('Bem Vindo! Por favor faça o registro inicial da sua conta')
+    print('=' * 50)
+
+    nome = input('Informe o Seu Nome: ')
+    cpf = input('Informe o Seu CPF: ')
+    numero_conta = input('Informe o Número da Sua Conta: ')
+    endereco = input('Informe o seu endereço: ')
+
+    cliente = PessoaFisica(cpf, nome, None, endereco)
+    conta = Conta(0, numero_conta, '0001', cliente)
+    cliente.adicionar_conta(conta)
+
+    print('Usuário Cadastrado com Sucesso!')
+    return cliente
+
+# FUNÇÃO PARA A APRESENTAÇÃO DO MENU
+def menu_inicial():
+    print('''
+    [1] DEPÓSITO
+    [2] SAQUE
+    [3] EXTRATO
+    [4] CRIAR USUÁRIO
+    [5] LISTAR CONTAS
+    [0] SAIR
+    ''')
+    opcao = str(input('Escolha uma operação: '))
+    return opcao
+
+# FUNÇÃO PARA A OPERAÇÃO DE DEPÓSITO
+def operacao_deposito(conta):
+    valor = float(input('Informe o valor para depósito: R$ '))
+    if valor > 0:
+        conta.depositar(valor)
+    else:
+        print('Valor Inválido!')
+
+# FUNÇÃO PARA A OPERAÇÃO DE SAQUE
+def operacao_saque(conta):
+    valor = float(input('Informe o valor para o saque: R$ '))
+    conta.sacar(valor)
+
+# FUNÇÃO PARA A OPERAÇÃO DE EXTRATO
+def operacao_extrato(conta):
+    print('=' * 50)
+    print('EXTRATO DE MOVIMENTAÇÕES')
+    print('=' * 50)
+    
+    if not conta.historico.transacoes:
+        print('Não foram realizadas operações durante a sessão')
+    else:
+        for transacao in conta.historico.transacoes:
+            tipo = 'Depósito' if isinstance(transacao, Deposito) else 'Saque'
+            print(f'{tipo}: R$ {transacao.valor:.2f}')
+        print('=' * 50)
+        print(f'Saldo Atual R$ {conta.saldo:.2f}')
+        print('=' * 50)
+
+# FUNÇÃO PARA A CRIAÇÃO DE NOVOS USUÁRIOS
+def novos_usuarios(lista_clientes):
+    nome = input('Informe o Seu Nome: ')
+    cpf = input('Insira o Seu CPF: ')
+    numero_conta = input('Insira a Sua Conta: ')
+    endereco = input('Informe o seu endereço: ')
+
+    for cliente in lista_clientes:
+        if cliente.cpf == cpf:
+            print('CPF já cadastrado!')
+            return lista_clientes
+    
+    novo_cliente = PessoaFisica(cpf, nome, None, endereco)
+    conta = Conta(0, numero_conta, '0001', novo_cliente)
+    novo_cliente.adicionar_conta(conta)
+
+    lista_clientes.append(novo_cliente)
+    print('Usuário Cadastrado com Sucesso!')
+    return lista_clientes
+
+# FUNÇÃO PARA A OPERAÇÃO DE LISTAR CONTAS
+def contas_criadas(lista_clientes):
+    print('=' * 50)
+    print('CONTAS CRIADAS')
+    print('=' * 50)
+    
+    if not lista_clientes:
+        print('Nenhuma Conta Adicional Foi Criada')
+    else:
+        for cliente in lista_clientes:
+            for conta in cliente.contas:
+                print(f"Nome {cliente.nome}, CPF {cliente.cpf}, Conta {conta.numero}, Saldo {conta.saldo}")
+                print('=' * 50)
+
+# FUNÇÃO PRINCIPAL QUE COORDENARÁ AS OPERAÇÕES (todas as outras funções serão executadas)
+def main():
+    lista_clientes = []
+    primeiro_cliente = primeira_execucao()
+    lista_clientes.append(primeiro_cliente)
+    
+    while True:
+        opcao = menu_inicial()
+        
+        if opcao == '1':
+            operacao_deposito(primeiro_cliente.contas[0])
+        
+        if opcao == '2':
+            operacao_saque(primeiro_cliente.contas[0])
+        
+        if opcao == '3':
+            operacao_extrato(primeiro_cliente.contas[0])
+            
+        if opcao == '4':
+            lista_clientes = novos_usuarios(lista_clientes)
+        
+        if opcao == '5':
+            contas_criadas(lista_clientes)
+
+        if opcao == '0':
+            break
+
+if __name__ == "__main__":
+    main()
