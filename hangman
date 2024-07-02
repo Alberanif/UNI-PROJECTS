@@ -1,0 +1,44 @@
+import random
+
+palavras = ['casamento', 'liberdade', 'vida']
+        
+turno = random.choice(palavras)
+
+lista_turno = ['_' for _ in turno]
+
+def verificar_palavra(turno, lista_turno, jogada):
+    
+    for pos, caract in enumerate(turno):
+        if caract == jogada:
+            lista_turno[pos] = jogada
+    return lista_turno
+
+contador = 0
+lim_tentativas = 5
+jogada = ''
+
+while '_' in lista_turno and contador < lim_tentativas:
+    print('JOGO DA FORCA')
+    print('''
+           -----
+         |      |
+         |
+         |
+         |
+         |
+    =========
+          ''')
+    print(' '.join(lista_turno))
+    jogada = input('Digite uma letra: ')
+    
+    if jogada in turno:
+        lista_turno = verificar_palavra(turno, lista_turno, jogada)
+    else:
+        contador += 1
+        print(f'Você ainda possui {lim_tentativas - contador} de tentativas')
+
+if '_' not in lista_turno:
+    print(f'Parabéns! A palavra correta era: {turno}')
+else:
+    print('As tentativas acabaram...')
+    print(f'A palavra correta era {turno}')
