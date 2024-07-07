@@ -1,0 +1,73 @@
+import random
+
+class Jogo():
+    
+    def __init__(self):
+        print('JOGO DA FORCA')
+    
+    def verificar_palavras(self):
+        pass
+    
+class Palavras(Jogo):
+    
+    def __init__(self, palavra_escolhida):
+        super().__init__()
+    
+        self.palavra_escolhida = palavra_escolhida
+    
+        self.lista_jogada = ['_' for i in self.palavra_escolhida]
+        
+        self.jogada = ''
+        
+        self.contador = 0
+        
+        self.lim_tentativas = 5
+    
+    def verificar_palavras(self):
+    
+        for pos, letra in enumerate(self.palavra_escolhida):
+            if letra == self.jogada:
+                self.lista_jogada[pos] = self.jogada
+        
+        return self.lista_jogada
+    
+    def jogar_palavras(self):
+                
+        while '_' in self.lista_jogada and self.contador < self.lim_tentativas:
+            print('''
+                   -----
+                |       |
+                |
+                |
+                |
+                |
+            =========
+                  ''')
+            
+            print(' '.join(self.lista_jogada))
+            self.jogada = input('Digite uma letra: ')
+            
+            if self.jogada in self.palavra_escolhida:
+                self.verificar_palavras()
+            else:
+                self.contador += 1
+                print(f'Você ainda possui {self.lim_tentativas - self.contador} tentativas')
+    
+        if '_' not in self.lista_jogada:
+            print(f'Parabéns! A palavra correta era {self.palavra_escolhida}')
+        else:
+            print('Você perdeu....')
+            print(f'A palavra correta era {self.palavra_escolhida}')
+
+def palavra_aleatoria():
+    palavras = ['casamento', 'mozao', 'lola']
+    
+    palavra_escolhida = random.choice(palavras)
+    
+    return palavra_escolhida
+
+palavra = palavra_aleatoria()
+jogo = Palavras(palavra)
+jogo.jogar_palavras()
+
+            
